@@ -87,20 +87,22 @@ locals {
         drop_local_broadcast = false
         drop_multicast       = false
       }
-      inbound = [
-        {
-          port   = "any"
-          proto  = "any"
-          groups = ["nodes"]
-        }
-      ]
-      outbound = [
-        {
-          port  = "any"
-          proto = "any"
-          host  = "any"
-        }
-      ]
+      firewall = {
+        inbound = [
+          {
+            port   = "any"
+            proto  = "any"
+            groups = ["nodes"]
+          }
+        ]
+        outbound = [
+          {
+            port  = "any"
+            proto = "any"
+            host  = "any"
+          }
+        ]
+      }
     }
   }
 }
