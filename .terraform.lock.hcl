@@ -1,0 +1,65 @@
+# This file is maintained automatically by "terraform init".
+# Manual edits may be lost in future updates.
+
+provider "registry.terraform.io/hashicorp/local" {
+  version     = "2.1.0"
+  constraints = "2.1.0"
+  hashes = [
+    "h1:KfieWtVyGWwplSoLIB5usKAUnrIkDQBkWaR5TI+4WYg=",
+    "zh:0f1ec65101fa35050978d483d6e8916664b7556800348456ff3d09454ac1eae2",
+    "zh:36e42ac19f5d68467aacf07e6adcf83c7486f2e5b5f4339e9671f68525fc87ab",
+    "zh:6db9db2a1819e77b1642ec3b5e95042b202aee8151a0256d289f2e141bf3ceb3",
+    "zh:719dfd97bb9ddce99f7d741260b8ece2682b363735c764cac83303f02386075a",
+    "zh:7598bb86e0378fd97eaa04638c1a4c75f960f62f69d3662e6d80ffa5a89847fe",
+    "zh:ad0a188b52517fec9eca393f1e2c9daea362b33ae2eb38a857b6b09949a727c1",
+    "zh:c46846c8df66a13fee6eff7dc5d528a7f868ae0dcf92d79deaac73cc297ed20c",
+    "zh:dc1a20a2eec12095d04bf6da5321f535351a594a636912361db20eb2a707ccc4",
+    "zh:e57ab4771a9d999401f6badd8b018558357d3cbdf3d33cc0c4f83e818ca8e94b",
+    "zh:ebdcde208072b4b0f8d305ebf2bfdc62c926e0717599dcf8ec2fd8c5845031c3",
+    "zh:ef34c52b68933bedd0868a13ccfd59ff1c820f299760b3c02e008dc95e2ece91",
+  ]
+}
+
+provider "registry.terraform.io/scottwinkler/shell" {
+  version     = "1.7.10"
+  constraints = "1.7.10"
+  hashes = [
+    "h1:Z+7wNtYRSB+9lhp6D0r/swahQ5XhSSH1mfRZl6KxNr8=",
+    "zh:0017ae6dcdcf320df10dd0a24f22dd7f1bd92cc62c2550f5696888d7bb042d81",
+    "zh:00574d8102685054080ad68db5ee99f1ee02c07709d3f77324be2d134eddf0d4",
+    "zh:0a9b84dccbfe0e704a81c1e76f75c95efdc4bf03c6a1a210b1b386dfd1593209",
+    "zh:2426358421619cb9125f2145f567908a904fd2a51e86c0afdf92082ea0532e9d",
+    "zh:425794426f7bb78921b3329c82f6373d5a5f072f28cc7296fdb21e13c595c0e8",
+    "zh:64d1a85a356ab75e84f12cbab41c548e069609098279eb5360c295b06a6f2994",
+    "zh:71612774c04cdeae2520a0ea19f938c17b9f6600eaa0356905f40d35caca1e81",
+    "zh:8d841d44c929bc4882d05c59ddd1bb1b91174c96139500ba29daacf74cf91406",
+    "zh:97ed1034b0962be59d2e03221031cb49f2ac9e992392bab3b08cbce9fa15e244",
+    "zh:9daebe55771a8e5b7b21c59cd53d86af9a1435e903ca60de119ccb3bc73a87b8",
+    "zh:a2d477ed687592a392439c7f96e378c9aa356151f7b2b44dcebc9aae956018e0",
+    "zh:c0f7e2656593ac97db96d82da41d8a3bd6584406f6d944b02d14ab132b3043ad",
+    "zh:cc24f9cd5ba535fbdb1bcabea69c5f150b43004ed180a3d14d740700d0d1a4b7",
+    "zh:cd7283a1a9fb857eb0c2e436ad9859b557127b594a1c7f818c1cb7a20df1c724",
+  ]
+}
+
+provider "registry.terraform.io/telkomindonesia/nebula" {
+  version     = "0.2.0"
+  constraints = "0.2.0"
+  hashes = [
+    "h1:b8hl9G6RNcqDCONxA1oPJSMJ7gjKZAtHoCAey48hID4=",
+    "zh:08228c04174c4a75ff60e691391ebb93ded81c613c5b2270a7c3d9349bf5ce4a",
+    "zh:0f58fe3a5451d357c36d8678def0a4675a4001962c55c2db73f6cce2bc631540",
+    "zh:14beb7e45a82e796682d3eacc276165f385dc2c4e670ea8c8256a5f27ed86500",
+    "zh:193809dfff915af1ca7c6f8c4e9a588050c9f31093ac7147ac4e5d2014daa49c",
+    "zh:352bcf31dfea3a3d3bed7729c42966a554633cda776988b1083b9d0ab65a5c4c",
+    "zh:6a68acb72219a86a2530120ff96698c4174db17b071c1b0c37cf43dd6ab6aedd",
+    "zh:6f09515854e274e1bd3823f4801c3c925a65151af4b13ebe06133f9cb2aafa69",
+    "zh:7360166ca1859d56db01fb9800ace59c96e9a579b89ce4b1685a3640cb119026",
+    "zh:8def8b2f8b7ed1b01f7028b8f310426bd519111732336351674c171198f87b35",
+    "zh:8e6086cf62100d71742d093726c099a947a97a3d25ca3817e0da5d0fccc7cbbb",
+    "zh:9371f4cc5ef72733049ff0f7be3b10fdaa85d3a10cab95e1316c239d411ff776",
+    "zh:bb45ce901970337ff247d394229cfd876eb9363a912f7afeaeeedf2c34c12410",
+    "zh:f569b65999264a9416862bca5cd2a6177d94ccb0424f3a4ef424428912b9cb3c",
+    "zh:fbb387d6ae7ad02000d259c06d746f2549544f87f2c8df1b5744bd8de8e8b18f",
+  ]
+}
