@@ -10,6 +10,18 @@ resource "nebula_ca" "default" {
   early_renewal_duration = var.nebula_mesh.ca.early_renewal_duration
 }
 
+locals {
+  default_non_lighthouse_group = "_nodes_"
+  is_firewall_defined = length(flatten([
+    for node in var.nebula_mesh.nodes :
+    concat(
+      lookup(node.firewall, "inbound", null) == null ? [] : node.firewall.inbound,
+      lookup(node.firewall, "outbound", null) == null ? [] : node.firewall.outbound
+    )
+    if lookup(node, "firewall", null) != null
+  ])) > 0
+}
+
 
 resource "nebula_certificate" "node" {
   for_each = { for node in var.nebula_mesh.nodes : node.name => node }
@@ -17,7 +29,11 @@ resource "nebula_certificate" "node" {
   ip   = each.value.ip
   name = each.value.name
 
-  groups                 = each.value.groups
+  groups = (
+    lookup(each.value, "am_lighthouse", null) == true ?
+    each.value.groups :
+    distinct(concat(each.value.groups != null ? each.value.groups : [], [local.default_non_lighthouse_group]))
+  )
   public_key             = each.value.public_key
   duration               = each.value.duration
   early_renewal_duration = each.value.early_renewal_duration
@@ -87,29 +103,46 @@ locals {
         drop_local_broadcast = false
         drop_multicast       = false
       }
-      firewall = {
-        inbound = [
-          {
-            port   = "any"
-            proto  = "any"
-            groups = ["nodes"]
-          }
-        ]
-        outbound = [
-          {
-            port  = "any"
-            proto = "any"
-            host  = "any"
-          }
-        ]
+      firewall = !local.is_firewall_defined ? {
+        inbound = tolist([{
+          port  = "any"
+          proto = "any"
+          group = local.default_non_lighthouse_group
+        }])
+        outbound = tolist([{
+          port  = "any"
+          proto = "any"
+          host  = "any"
+        }])
+        } : {
+        inbound  = try(flatten([node.firewall.inbound]), null)
+        outbound = try(flatten([node.firewall.outbound]), null)
       }
     }
   }
 }
 
 resource "local_file" "nebula_node_config" {
-  for_each = var.nebula_config_output_dir != "" ? local.nebula_node_configs : {}
+  for_each = var.nebula_config_output_dir == "" ? null : local.nebula_node_configs
 
   filename = "${var.nebula_config_output_dir}/${each.key}/nebula.yml"
   content  = yamlencode(each.value)
+}
+
+resource "local_file" "nebula_ca" {
+  for_each = var.nebula_config_output_dir == "" ? null : {
+    for node in var.nebula_mesh.nodes : node.name => node
+    if node.public_key != null
+  }
+  filename = "${var.nebula_config_output_dir}/${each.key}/ca.cert"
+  content  = nebula_certificate.node[each.key].ca_cert
+}
+
+resource "local_file" "nebula_node_cert" {
+  for_each = var.nebula_config_output_dir == "" ? null : {
+    for node in var.nebula_mesh.nodes : node.name => node
+    if node.public_key != null
+  }
+  filename = "${var.nebula_config_output_dir}/${each.key}/nebula.cert"
+  content  = nebula_certificate.node[each.key].cert
 }
