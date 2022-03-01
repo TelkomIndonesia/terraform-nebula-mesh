@@ -123,25 +123,25 @@ locals {
 }
 
 resource "local_file" "nebula_node_config" {
-  for_each = var.nebula_config_output_dir == "" ? null : local.nebula_node_configs
+  for_each = { for k, v in local.nebula_node_configs : k => v if var.nebula_config_output_dir != "" }
 
   filename = "${var.nebula_config_output_dir}/${each.key}/nebula.yml"
   content  = yamlencode(each.value)
 }
 
 resource "local_file" "nebula_ca" {
-  for_each = var.nebula_config_output_dir == "" ? null : {
+  for_each = {
     for node in var.nebula_mesh.nodes : node.name => node
-    if node.public_key != null
+    if var.nebula_config_output_dir != "" && node.public_key != null
   }
   filename = "${var.nebula_config_output_dir}/${each.key}/ca.cert"
   content  = nebula_certificate.node[each.key].ca_cert
 }
 
 resource "local_file" "nebula_node_cert" {
-  for_each = var.nebula_config_output_dir == "" ? null : {
+  for_each = {
     for node in var.nebula_mesh.nodes : node.name => node
-    if node.public_key != null
+    if var.nebula_config_output_dir != "" && node.public_key != null
   }
   filename = "${var.nebula_config_output_dir}/${each.key}/nebula.cert"
   content  = nebula_certificate.node[each.key].cert
