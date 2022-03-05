@@ -70,8 +70,8 @@ locals {
       }
       lighthouse = {
         am_lighthouse = lookup(node, "am_lighthouse", false) == true
-        serve_dns     = lookup(node, "am_lighthouse", false) == true
-        dns = lookup(node, "am_lighthouse", false) != true ? null : {
+        serve_dns     = lookup(node, "serve_dns", false)
+        dns = lookup(node, "serve_dns", false) != true ? null : {
           host = "0.0.0.0"
           port = 53
         }
@@ -99,24 +99,21 @@ locals {
         delay   = "1s"
       }
       tun = {
-        disabled             = lookup(node, "am_lighthouse", false) == true
+        disabled             = lookup(node, "am_lighthouse", false) == true && lookup(node, "serve_dns", false) != true
         drop_local_broadcast = false
         drop_multicast       = false
       }
-      firewall = !local.is_firewall_defined ? {
-        inbound = tolist([{
-          port  = "any"
-          proto = "any"
-          group = local.default_non_lighthouse_group
-        }])
-        outbound = tolist([{
-          port  = "any"
-          proto = "any"
-          host  = "any"
-        }])
-        } : {
-        inbound  = try(flatten([node.firewall.inbound]), null)
-        outbound = try(flatten([node.firewall.outbound]), null)
+      firewall = {
+        inbound = try([
+          for rule in node.firewall.inbound : {
+            for k, v in rule : k => v if v != null
+          }
+        ], local.is_firewall_defined ? null : [{ proto = "any", port = "any", group = local.default_non_lighthouse_group, }])
+        outbound = try([
+          for rule in node.firewall.outbound : {
+            for k, v in rule : k => v if v != null
+          }
+        ], local.is_firewall_defined ? null : [{ proto = "any", port = "any", host = "any" }])
       }
     }
   }
