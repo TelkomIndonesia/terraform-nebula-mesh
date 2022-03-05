@@ -8,8 +8,9 @@ An opiniated but overridable [Nebula](https://github.com/slackhq/nebula) configu
 module "nebula_mesh" {
   source                   = "TelkomIndonesia/mesh/nebula"
   version                  = "0.3.0"
-  nebula_config_output_dir = ".output"
-  nebula_mesh = {
+  
+  config_output_dir = ".output"
+  mesh = {
     ca = {
         name         = "awesome"
         instance_ids = ["1"]

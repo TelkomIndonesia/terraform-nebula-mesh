@@ -1,5 +1,5 @@
-nebula_config_output_dir = ".output/nebula"
-nebula_mesh = {
+config_output_dir = ".output/nebula"
+mesh = {
   ca = {
     name         = "awesome"
     instance_ids = ["2"]

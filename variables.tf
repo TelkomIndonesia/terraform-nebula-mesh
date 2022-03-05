@@ -1,10 +1,16 @@
-variable "nebula_config_output_dir" {
+variable "config_output_dir" {
   type        = string
   default     = ""
   description = "Directory to store generated configuration file. If empty then no configuration file is created"
 }
 
-variable "nebula_mesh" {
+variable "default_non_lighthouse_group" {
+  type        = string
+  default     = "_nodes_"
+  description = "default group to be added to all nodes that are not lighthouse"
+}
+
+variable "mesh" {
   type = object({
     ca = object({
       name                   = string
@@ -28,6 +34,7 @@ variable "nebula_mesh" {
 
       am_lighthouse = optional(bool)
       blocked       = optional(bool)
+      blocklist     = optional(list(string))
       listen = optional(object({
         host = optional(string)
         port = optional(number)
@@ -35,6 +42,10 @@ variable "nebula_mesh" {
       addresses = optional(list(object({
         host = string
         port = optional(number)
+      })))
+      routes_mtu = optional(list(object({
+        mtu   = number
+        route = string
       })))
       firewall = optional(object({
         inbound = optional(list(object({
@@ -63,17 +74,25 @@ variable "nebula_mesh" {
   description = "Membership data of nebula network"
 
   validation {
-    condition     = length(var.nebula_mesh.ca.instance_ids) > 0 && join("|", var.nebula_mesh.ca.instance_ids) == join("|", distinct(compact(var.nebula_mesh.ca.instance_ids)))
+    condition     = length(var.mesh.ca.instance_ids) > 0 && join("|", var.mesh.ca.instance_ids) == join("|", distinct(compact(var.mesh.ca.instance_ids)))
     error_message = "The `ca.instance_ids` must contains at least 1 item. It should contains arbritrary unique string that will be associated to each generated CA. The public certificate of all CAs will be added to `pki.ca` configuration object, but only CA referenced by the first ID will be used to sign certificates for all nodes."
   }
   validation {
-    condition     = length(var.nebula_mesh.nodes) == length(distinct([for nodes in var.nebula_mesh.nodes : split("/", nodes.ip)[0]]))
+    condition     = length(var.mesh.nodes) == length(distinct([for nodes in var.mesh.nodes : split("/", nodes.ip)[0]]))
     error_message = "The `nodes[*].ip` should be unique on each node."
   }
   validation {
     condition = length([
+      for v in flatten([
+        for node in var.mesh.nodes : try(node.routes_mtu, [])
+      ]) : v if try(cidrhost(v.route, 0), "") == ""
+    ]) == 0
+    error_message = "The `nodes[*].routes_mtu[*].route` must be valid CIDR."
+  }
+  validation {
+    condition = length([
       for rule in flatten([
-        for node in var.nebula_mesh.nodes :
+        for node in var.mesh.nodes :
         concat(
           lookup(node.firewall, "inbound", null) == null ? [] : node.firewall.inbound,
           lookup(node.firewall, "outbound", null) == null ? [] : node.firewall.outbound
