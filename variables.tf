@@ -83,9 +83,10 @@ variable "mesh" {
   }
   validation {
     condition = length([
-      for v in flatten([
-        for node in var.mesh.nodes : try(node.routes_mtu, [])
-      ]) : v if try(cidrhost(v.route, 0), "") == ""
+      for v in try(flatten([
+        for node in var.mesh.nodes : node.routes_mtu
+      ]), []) :
+      v if try(cidrhost(v.route, 0), "") == ""
     ]) == 0
     error_message = "The `nodes[*].routes_mtu[*].route` must be valid CIDR."
   }
