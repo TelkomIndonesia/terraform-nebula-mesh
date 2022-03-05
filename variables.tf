@@ -83,7 +83,7 @@ variable "nebula_mesh" {
       lookup(rule, "host", null) == null &&
       lookup(rule, "group", null) == null &&
       lookup(rule, "cidr", null) == null &&
-      length(lookup(rule, "groups", [])) == 0
+      try(length(lookup(rule, "groups", [])), 0) == 0
       ]
     ) == 0
     error_message = "Invalid firewall definition. at least one of `host`, `group`, `groups`, `cidr`, or `ca_name` must be provided."
