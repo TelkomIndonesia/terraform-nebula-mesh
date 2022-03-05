@@ -40,8 +40,9 @@ variable "nebula_mesh" {
         inbound = optional(list(object({
           port    = string
           proto   = string
-          host    = optional(string)
+          ca_sha  = optional(string)
           ca_name = optional(string)
+          host    = optional(string)
           group   = optional(string)
           groups  = optional(list(string))
           cidr    = optional(string)
@@ -49,6 +50,7 @@ variable "nebula_mesh" {
         outbound = optional(list(object({
           port    = string
           proto   = string
+          ca_sha  = optional(string)
           ca_name = optional(string)
           host    = optional(string)
           group   = optional(string)
