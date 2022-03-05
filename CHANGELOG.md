@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.3.0
+
+### Changed
+
+- Variable `nebula_mesh` to `mesh` by [@rucciva](https://github.com/rucciva).
+- Variable `nebula_config_output_dir` to `config_output_dir` by [@rucciva](https://github.com/rucciva).
+
+### Added
+
+- Sub variable `mesh.routes_mtu` by [@rucciva](https://github.com/rucciva).
+- Sub variable `mesh.blocklist` by [@rucciva](https://github.com/rucciva).
+- Variable `default_non_lighthouse_group` by [@rucciva](https://github.com/rucciva).
+
 ## 0.2.4
 
 ### Fixed

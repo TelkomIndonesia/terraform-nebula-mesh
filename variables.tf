@@ -1,13 +1,13 @@
 variable "config_output_dir" {
   type        = string
   default     = ""
-  description = "Directory to store generated configuration file. If empty then no configuration file is created"
+  description = "Directory to store generated configuration file. If empty then no configuration file is created."
 }
 
 variable "default_non_lighthouse_group" {
   type        = string
   default     = "_nodes_"
-  description = "default group to be added to all nodes that are not lighthouse"
+  description = "default group to be added to all nodes that are not lighthouse. Set empty to prevent addition of default group"
 }
 
 variable "mesh" {
