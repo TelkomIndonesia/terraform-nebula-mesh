@@ -32,6 +32,7 @@ resource "nebula_certificate" "node" {
     try(coalesce(each.value.groups), []) :
     concat(try(coalesce(each.value.groups), []), [var.default_non_lighthouse_group])
   )))
+  subnets                = each.value.subnets
   public_key             = each.value.public_key
   duration               = each.value.duration
   early_renewal_duration = each.value.early_renewal_duration
