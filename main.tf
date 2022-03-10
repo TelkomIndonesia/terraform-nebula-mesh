@@ -28,7 +28,7 @@ resource "nebula_certificate" "node" {
   name = each.value.name
 
   groups = compact(distinct((
-    try(each.value.config.am_lighthouse, false) == true ?
+    try(each.value.lighthouse.am_lighthouse, false) == true ?
     try(flatten(each.value.groups), []) :
     concat(try(flatten(each.value.groups), []), [var.default_non_lighthouse_group])
   )))
