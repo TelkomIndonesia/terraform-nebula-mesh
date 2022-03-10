@@ -8,11 +8,20 @@ mesh = {
     {
       name = "ligthouse"
       ip   = "192.168.127.1/24"
-
-      am_lighthouse = true
-      addresses = [
+      static_addresses = [
         { host = "180.1.1.2" }
       ]
+
+      lighthouse = {
+        am_lighthouse = true
+      }
+      firewall = {
+        inbound = [{
+          host  = "any"
+          port  = "any"
+          proto = "any"
+        }]
+      }
     },
     {
       name = "node1"
