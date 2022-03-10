@@ -55,11 +55,7 @@ locals {
         for tnode in var.mesh.nodes :
         split("/", tnode.ip)[0] => [
           for address in tnode.static_addresses :
-          "${
-            address.host
-            }:${
-            address.port != null ? address.port : try(coalesce(tnode.listen.port), 4242)
-          }"
+          "${address.host}:${try(coalesce(address.port, tnode.listen.port), 4242)}"
         ]
         if tnode.static_addresses != null
       }
