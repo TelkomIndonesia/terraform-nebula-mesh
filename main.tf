@@ -14,8 +14,8 @@ locals {
   is_firewall_defined = length(flatten([
     for node in var.mesh.nodes :
     concat(
-      try(flatten(node.firewall.inbound), []),
-      try(flatten(node.firewall.outbound), []),
+      try(coalesce(node.firewall.inbound), []),
+      try(coalesce(node.firewall.outbound), []),
     )
   ])) > 0
 }
@@ -29,8 +29,8 @@ resource "nebula_certificate" "node" {
 
   groups = compact(distinct((
     try(each.value.lighthouse.am_lighthouse, false) == true ?
-    try(flatten(each.value.groups), []) :
-    concat(try(flatten(each.value.groups), []), [var.default_non_lighthouse_group])
+    try(coalesce(each.value.groups), []) :
+    concat(try(coalesce(each.value.groups), []), [var.default_non_lighthouse_group])
   )))
   public_key             = each.value.public_key
   duration               = each.value.duration
