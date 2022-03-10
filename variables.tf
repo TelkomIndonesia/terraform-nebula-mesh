@@ -179,11 +179,11 @@ variable "mesh" {
         concat(
           keys(try(coalesce(node.lighthouse.remote_allow_list), {})),
           [for k, v in try(coalesce(node.lighthouse.local_allow_list), {}) : k if k != "interfaces"],
-          try(node.preferred_ranges, []),
-          [for route in try(node.tun.routes, []) : try(coalesce(route.route), null)],
-          [for route in try(node.tun.unsafe_routes, []) : try(coalesce(route.route), null)],
-          [for rule in try(node.firewall.inbound, []) : try(coalesce(rule.cidr), null)],
-          [for rule in try(node.firewall.outbound, []) : try(coalesce(rule.cidr), null)],
+          try(coalesce(node.preferred_ranges), []),
+          [for route in try(coalesce(node.tun.routes), []) : try(coalesce(route.route), null)],
+          [for route in try(coalesce(node.tun.unsafe_routes), []) : try(coalesce(route.route), null)],
+          [for rule in try(coalesce(node.firewall.inbound), []) : try(coalesce(rule.cidr), null)],
+          [for rule in try(coalesce(node.firewall.outbound), []) : try(coalesce(rule.cidr), null)],
         )
       ])) :
       v if try(cidrhost(v, 0), "") == ""
@@ -205,8 +205,7 @@ variable "mesh" {
       lookup(rule, "group", null) == null &&
       lookup(rule, "cidr", null) == null &&
       try(length(lookup(rule, "groups", [])), 0) == 0
-      ]
-    ) == 0
+    ]) == 0
     error_message = "Invalid firewall definition. at least one of `host`, `group`, `groups`, `cidr`, or `ca_name` must be provided."
   }
 }
