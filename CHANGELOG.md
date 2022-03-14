@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.5.0
+
+### Added
+
+- node's `active` to add certificate to blocklist if set to `false` by [@rucciva](https://github.com/rucciva).
+- node's `instance_id` which if combined with `active` can be used to add old certificate to blocklist by [@rucciva](https://github.com/rucciva).
+
+### Changed
+
+- ca's `instance_ids` is now optional, default [""]  by [@rucciva](https://github.com/rucciva).
+
 ## 0.4.3
 
 ### Fixed
