@@ -13,17 +13,20 @@ variable "default_non_lighthouse_group" {
 variable "mesh" {
   type = object({
     ca = object({
+      instance_ids = optional(list(string))
+
       name                   = string
       groups                 = optional(list(string))
       ips                    = optional(list(string))
       subnets                = optional(list(string))
       duration               = optional(string)
       early_renewal_duration = optional(string)
-
-      instance_ids = list(string)
     })
 
     nodes = list(object({
+      instance_id = optional(string)
+      active      = optional(bool)
+
       name                   = string
       groups                 = optional(list(string))
       ip                     = string
@@ -165,17 +168,17 @@ variable "mesh" {
   description = "Membership data of nebula network"
 
   validation {
-    condition     = length(var.mesh.ca.instance_ids) > 0 && join("|", var.mesh.ca.instance_ids) == join("|", distinct(compact(var.mesh.ca.instance_ids)))
-    error_message = "The `ca.instance_ids` must contains at least 1 item. It should contains arbritrary unique string that will be associated to each generated CA. The public certificate of all CAs will be added to `pki.ca` configuration object, but only CA referenced by the first ID will be used to sign certificates for all nodes."
+    condition     = join("|", try(coalesce(var.mesh.ca.instance_ids), [])) == join("|", distinct(try(coalesce(var.mesh.ca.instance_ids), [])))
+    error_message = "The `ca.instance_ids` must contains arbritrary unique string that will be associated to each generated CA. The public certificate of all CAs will be added to `pki.ca` configuration object, but only CA referenced by the first ID will be used to sign certificates for all nodes."
   }
   validation {
-    condition     = length(var.mesh.nodes) == length(distinct([for nodes in var.mesh.nodes : split("/", nodes.ip)[0]]))
+    condition     = length([for node in var.mesh.nodes : node if try(coalesce(node.active), true)]) == length(distinct([for nodes in [for node in var.mesh.nodes : node if try(coalesce(node.active), true)] : split("/", nodes.ip)[0]]))
     error_message = "The `nodes[*].ip` should be unique on each node."
   }
   validation {
     condition = length([
       for v in compact(flatten([
-        for node in var.mesh.nodes :
+        for node in [for node in var.mesh.nodes : node if try(coalesce(node.active), true)] :
         concat(
           keys(try(coalesce(node.lighthouse.remote_allow_list), {})),
           [for k, v in try(coalesce(node.lighthouse.local_allow_list), {}) : k if k != "interfaces"],
@@ -193,7 +196,7 @@ variable "mesh" {
   validation {
     condition = length([
       for rule in flatten([
-        for node in var.mesh.nodes :
+        for node in [for node in var.mesh.nodes : node if try(coalesce(node.active), true)] :
         concat(
           try(coalesce(node.firewall.inbound), []),
           try(coalesce(node.firewall.outbound), []),

@@ -1,7 +1,8 @@
 config_output_dir = ".output/nebula"
 mesh = {
   ca = {
-    name = "awesome"
+    name         = "awesome"
+    instance_ids = ["1"]
   }
   nodes = [
     {
@@ -16,8 +17,14 @@ mesh = {
       }
     },
     {
-      name = "node1"
-      ip   = "192.168.127.2/24"
+      name   = "node1"
+      ip     = "192.168.127.2/24"
+      active = false
+    },
+    {
+      name        = "node1"
+      ip          = "192.168.127.2/24"
+      instance_id = "1"
     },
     {
       name       = "phone1"

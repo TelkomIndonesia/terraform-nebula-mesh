@@ -2,7 +2,7 @@ config_output_dir = ".output/nebula"
 mesh = {
   ca = {
     name         = "awesome"
-    instance_ids = ["2"]
+    instance_ids = ["1"]
   }
   nodes = [
     {
@@ -14,13 +14,6 @@ mesh = {
 
       lighthouse = {
         am_lighthouse = true
-      }
-      firewall = {
-        inbound = [{
-          host  = "any"
-          port  = "any"
-          proto = "any"
-        }]
       }
     },
     {
