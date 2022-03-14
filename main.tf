@@ -1,6 +1,10 @@
 
+locals {
+  ca_instance_ids = try(coalesce(var.mesh.ca.instance_ids), [""])
+}
+
 resource "nebula_ca" "default" {
-  for_each = toset(var.mesh.ca.instance_ids)
+  for_each = toset(local.ca_instance_ids)
   name     = var.mesh.ca.name
 
   groups                 = var.mesh.ca.groups
@@ -18,11 +22,14 @@ locals {
       try(coalesce(node.firewall.outbound), []),
     )
   ])) > 0
+
+  nodes = { for node in var.mesh.nodes :
+    try(join("-", [node.name, node.instance_id]), node.name) => node
+  }
 }
 
-
 resource "nebula_certificate" "node" {
-  for_each = { for node in var.mesh.nodes : node.name => node }
+  for_each = local.nodes
 
   ip   = each.value.ip
   name = each.value.name
@@ -37,21 +44,28 @@ resource "nebula_certificate" "node" {
   duration               = each.value.duration
   early_renewal_duration = each.value.early_renewal_duration
 
-  ca_cert = nebula_ca.default[var.mesh.ca.instance_ids[0]].cert
-  ca_key  = nebula_ca.default[var.mesh.ca.instance_ids[0]].key
+  ca_cert = nebula_ca.default[local.ca_instance_ids[0]].cert
+  ca_key  = nebula_ca.default[local.ca_instance_ids[0]].key
 }
 
 locals {
-  nebula_node_configs = { for node in var.mesh.nodes :
+  nebula_node_configs = { for node_key, node in local.nodes :
     node.name => {
       pki = merge(
         {
-          ca   = join("", concat([for ca in nebula_ca.default : ca.cert], try(node.pki.additional_ca, [])))
-          cert = nebula_certificate.node[node.name].cert
-          key  = nebula_certificate.node[node.name].key
+          ca   = join("", concat([for ca in nebula_ca.default : ca.cert], try(coalesce(node.pki.additional_ca), [])))
+          cert = nebula_certificate.node[node_key].cert
+          key  = nebula_certificate.node[node_key].key
         },
-        { for k, v in try(coalesce(node.pki), {}) : k => v if k != "additional_ca" && v != null }
+        { for k, v in try(coalesce(node.pki), {}) : k => v if k != "additional_ca" && k != "blocklist" && v != null },
+        {
+          blocklist = concat(
+            try(coalesce(node.pki.blocklist), []),
+            [for node_key, node in local.nodes : nebula_certificate.node[node_key].fingerprint if !try(coalesce(node.active), true)]
+          )
+        }
       )
+
       static_host_map = {
         for tnode in var.mesh.nodes :
         split("/", tnode.ip)[0] => [
@@ -114,13 +128,14 @@ locals {
         )
       }
 
-      cipher           = try(node.cipher, null)
-      preferred_ranges = try(node.preferred_ranges, null)
+      cipher           = node.cipher
+      preferred_ranges = node.preferred_ranges
       sshd             = { for k, v in try(coalesce(node.sshd), {}) : k => v if v != null }
       handshakes       = { for k, v in try(coalesce(node.handshakes), {}) : k => v if v != null }
       logging          = { for k, v in try(coalesce(node.logging), {}) : k => v if v != null }
       stats            = { for k, v in try(coalesce(node.stats), {}) : k => v if v != null }
     }
+    if try(coalesce(node.active), true)
   }
 }
 
@@ -133,8 +148,8 @@ resource "local_file" "nebula_node_config" {
 
 resource "local_file" "nebula_ca" {
   for_each = {
-    for node in var.mesh.nodes : node.name => node
-    if var.config_output_dir != "" && node.public_key != null
+    for node_key, node in local.nebula_node_configs : node_key => node
+    if var.config_output_dir != "" && local.nodes[node_key].public_key != null
   }
   filename = "${var.config_output_dir}/${each.key}/ca.cert"
   content  = nebula_certificate.node[each.key].ca_cert
@@ -142,8 +157,8 @@ resource "local_file" "nebula_ca" {
 
 resource "local_file" "nebula_node_cert" {
   for_each = {
-    for node in var.mesh.nodes : node.name => node
-    if var.config_output_dir != "" && node.public_key != null
+    for node_key, node in local.nebula_node_configs : node_key => node
+    if var.config_output_dir != "" && local.nodes[node_key].public_key != null
   }
   filename = "${var.config_output_dir}/${each.key}/nebula.cert"
   content  = nebula_certificate.node[each.key].cert
