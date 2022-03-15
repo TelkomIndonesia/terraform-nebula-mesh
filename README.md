@@ -15,7 +15,7 @@ module "nebula_mesh" {
         }
         nodes = [
             {
-                name = "ligthouse"
+                name = "lighthouse"
                 ip   = "192.168.127.1/24"
                 static_addresses = [
                     { host = "180.1.1.2" }
