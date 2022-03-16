@@ -51,7 +51,7 @@ resource "nebula_certificate" "node" {
 
 locals {
   nebula_node_configs = { for node_key, node in local.nodes :
-    node.name => {
+    node_key => {
       pki = merge(
         {
           ca = join("", concat(
@@ -70,9 +70,9 @@ locals {
           blocklist = concat(
             try(coalesce(node.pki.blocklist), []),
             [
-              for node_key, node in local.nodes :
-              nebula_certificate.node[node_key].fingerprint
-              if !try(coalesce(node.active), true)
+              for node_key, cert in nebula_certificate.node :
+              cert.fingerprint
+              if !try(coalesce(local.nodes[node_key].active), true)
             ]
           )
         }
@@ -157,18 +157,18 @@ resource "local_file" "nebula_node_config" {
 
 resource "local_file" "nebula_ca" {
   for_each = {
-    for node_key, node in local.nebula_node_configs : node_key => node
+    for node_key, cert in nebula_certificate.node : node_key => cert
     if var.config_output_dir != "" && local.nodes[node_key].public_key != null
   }
   filename = "${var.config_output_dir}/${each.key}/ca.cert"
-  content  = nebula_certificate.node[each.key].ca_cert
+  content  = each.value.ca_cert
 }
 
 resource "local_file" "nebula_node_cert" {
   for_each = {
-    for node_key, node in local.nebula_node_configs : node_key => node
+    for node_key, cert in nebula_certificate.node : node_key => cert
     if var.config_output_dir != "" && local.nodes[node_key].public_key != null
   }
   filename = "${var.config_output_dir}/${each.key}/nebula.cert"
-  content  = nebula_certificate.node[each.key].cert
+  content  = each.value.cert
 }
