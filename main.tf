@@ -53,20 +53,14 @@ locals {
   nebula_node_configs = { for node_key, node in local.nodes :
     node_key => {
       pki = merge(
+        try(coalesce(node.pki), {}),
         {
-          ca = join("", concat(
+          ca = join("\n", concat(
             [for ca in nebula_ca.default : ca.cert],
-            try(coalesce(node.pki.additional_ca), [])
+            try(coalesce(node.pki.ca), [])
           ))
           cert = nebula_certificate.node[node_key].cert
           key  = nebula_certificate.node[node_key].key
-        },
-        {
-          for k, v in try(coalesce(node.pki), {}) :
-          k => v
-          if k != "additional_ca" && k != "blocklist"
-        },
-        {
           blocklist = concat(
             try(coalesce(node.pki.blocklist), []),
             [
@@ -88,26 +82,32 @@ locals {
         if tnode.static_addresses != null && try(coalesce(tnode.active), true)
       }
       lighthouse = merge(
+        try(coalesce(node.lighthouse), {}),
         {
-          hosts = [
-            for tnode in var.mesh.nodes : split("/", tnode.ip)[0]
-            if try(tnode.lighthouse.am_lighthouse, false) == true && try(node.lighthouse.am_lighthouse, false) != true && try(coalesce(tnode.active), true)
-          ]
-          local_allow_list = {
-            interfaces = {
-              "docker*" = false
-              "br*"     = false
-              "veth*"   = false
+          hosts = try(coalesce(node.lighthouse.hosts),
+            [
+              for tnode in var.mesh.nodes : split("/", tnode.ip)[0]
+              if !try(coalesce(node.lighthouse.am_lighthouse), false) && try(coalesce(tnode.lighthouse.am_lighthouse), false) && try(coalesce(tnode.active), true)
+            ]
+          )
+          local_allow_list = try(coalesce(node.lighthouse.local_allow_list),
+            {
+              interfaces = {
+                "docker*" = false
+                "br*"     = false
+                "veth*"   = false
+              }
             }
-          }
-        },
-        try(coalesce(node.lighthouse), {})
+          )
+        }
       )
       listen = merge(
+        try(coalesce(node.listen), {}),
         {
-          port = try(node.lighthouse.am_lighthouse, false) == true ? 4242 : 0
-        },
-        try(coalesce(node.listen), {})
+          port = try(coalesce(node.listen.port),
+            try(coalesce(node.lighthouse.am_lighthouse), false) ? 4242 : 0
+          )
+        }
       )
       punchy = try(coalesce(node.punchy), {
         punch   = true
@@ -115,10 +115,14 @@ locals {
         delay   = "1s"
       })
       tun = merge(
+        try(coalesce(node.tun), {}),
         {
-          disabled = try(node.lighthouse.am_lighthouse, false) == true && try(node.lighthouse.serve_dns, false) != true && try(node.sshd.enabled, false) != true
+          disabled = try(coalesce(node.tun.disabled),
+            try(coalesce(node.lighthouse.am_lighthouse), false) &&
+            !try(coalesce(node.lighthouse.serve_dns), false) &&
+            !try(coalesce(node.sshd.enabled), false)
+          )
         },
-        try(coalesce(node.tun), {})
       )
       firewall = {
         conntrack = try(node.firewall.conntrack, null)
