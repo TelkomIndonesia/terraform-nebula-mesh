@@ -41,9 +41,9 @@ variable "mesh" {
       })))
 
       pki = optional(object({
+        ca                 = optional(list(string))
         blocklist          = optional(list(string))
         disconnect_invalid = optional(bool)
-        additional_ca      = optional(list(string))
       }))
 
       lighthouse = optional(object({
